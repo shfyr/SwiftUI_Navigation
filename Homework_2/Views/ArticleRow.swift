@@ -25,7 +25,7 @@ struct ArticleRow: View {
             HStack {
                 Text(article.newsSite)
                 Spacer()
-                Text(article.publishedAt)
+                Text(article.dateFormatter(date: article.publishedAt))
             }
             .foregroundStyle(.gray)
             AsyncImage(
@@ -36,6 +36,7 @@ struct ArticleRow: View {
                 } placeholder: {}
                 HStack(alignment: .top) {
                     Text(article.title)
+                        .multilineTextAlignment(.leading)
                         .fontWeight(.bold)
                         .font(.system(size: 22))
                         .foregroundStyle(.black)
@@ -63,6 +64,7 @@ struct ArticleRow: View {
 
                 Text(article.summary)
                     .foregroundColor(.black)
+                    .multilineTextAlignment(.leading)
                     .padding(-1)
             Spacer()
                 .frame(height: 15)

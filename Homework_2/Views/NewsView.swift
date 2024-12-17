@@ -11,87 +11,57 @@ private enum NavigationTarget: Hashable {
 }
 
 struct NewsView: View {
-    @StateObject private var contentService: ContentService
-    @State var contentType: ContentType
-    @State var content: [Article]?
-    @State var newsSite: String?
-    
-    init(
-        contentService: ContentService,
-        contentType: ContentType,
-        content: [Article]? = nil,
-        newsSite: String? = nil
-    ) {
-        _contentService = StateObject(wrappedValue: contentService)
+    @StateObject private var viewModel: ArticlesViewModel
+    let contentType: ContentType
+    let newsSite: String?
+
+    init(viewModel: ArticlesViewModel, contentType: ContentType, newsSite: String? = nil) {
+        _viewModel = StateObject(wrappedValue: viewModel)
         self.contentType = contentType
-        self.content = content
         self.newsSite = newsSite
     }
 
-    
     var body: some View {
         ScrollView {
-            LazyVStack (spacing: 1) {
-                ForEach(contentService.articles) { article in
+            LazyVStack(spacing: 1) {
+                ForEach(viewModel.articles, id: \.id) { article in
                     NavigationLink(
-                        value: configureNavigationLink(for: article)
+                        value: NavigationTarget.articleView(
+                            article: article,
+                            isLinkToAuthorPresented: newsSite == nil
+                        )
                     ) {
                         ArticleRow(article: article)
                             .onAppear {
                                 Task {
-                                    if contentService.articles.isLastItem(article) {
-                                        await contentService.fetch(category: contentType.rawValue, newsSite: newsSite)
+                                    if viewModel.articles.isLastItem(article) {
+                                        await viewModel.fetch(category: contentType.rawValue, newsSite: newsSite)
                                     }
                                 }
                             }
                     }
                 }
             }
-            .background(Color.gray)
         }
+        .onAppear {
+            Task {
+                if viewModel.articles.isEmpty {
+                    await viewModel.fetch(category: contentType.rawValue, newsSite: newsSite)
+                }
+            }
+        }
+        .navigationTitle(contentType.rawValue.capitalized)
+        .navigationBarTitleDisplayMode(.inline)
         .navigationDestination(for: NavigationTarget.self) { target in
             switch target {
             case .articleView(let article, let isLinkToAuthorPresented):
                 ArticleView(
                     article: article,
                     isLinkToAuthorPresented: isLinkToAuthorPresented,
-                    contentService: contentService,
                     contentType: contentType
                 )
-                .onAppear {
-                    Task {
-                        await contentService.fetch(category: contentType.rawValue, newsSite: newsSite)
-                    }
-                }
-            }
-            
-        }
-        .onAppear {
-            Task {
-                contentService.offset = 0
-                await contentService.fetch(category: contentType.rawValue, newsSite: newsSite)
             }
         }
-        
-        .navigationTitle(getTitle())
-        .navigationBarTitleDisplayMode(.inline)
-    }
-    
-    private func getTitle() -> String {
-        guard newsSite != nil else { return "" }
-        return "\(contentType) by \(newsSite ?? "")"
-    }
-    
-    private func configureNavigationLink(for article: Article) -> NavigationTarget {
-        newsSite == nil
-        ? NavigationTarget.articleView(
-            article: article,
-            isLinkToAuthorPresented: true
-        )
-        : NavigationTarget.articleView(
-            article: article,
-            isLinkToAuthorPresented: false
-        )
     }
 }
 

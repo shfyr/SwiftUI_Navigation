@@ -10,14 +10,12 @@ import SwiftUI
 @main
 struct Homework_2App: App {
     init() {
-        let contentService = ContentService()
-        
-        ServiceLocator.shared.register(contentService, for: ContentService.self)
+        // Register services on app startup
+        ServiceLocator.shared.register(NetworkService(), for: NetworkService.self)
     }
     var body: some Scene {
         WindowGroup {
-            let contentService = ServiceLocator.shared.resolve(ContentService.self)
-            ContentView(contentService: contentService)
+            ContentView()
         }
     }
 }
