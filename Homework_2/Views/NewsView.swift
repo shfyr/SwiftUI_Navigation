@@ -11,27 +11,30 @@ private enum NavigationTarget: Hashable {
 }
 
 struct NewsView: View {
-    @StateObject var contentService: ContentService
+    @StateObject private var contentService: ContentService
     @State var contentType: ContentType
     @State var content: [Article]?
     @State var newsSite: String?
-    @State private var myVar = false
-    @State private var navigationValue: NavigationTarget? = nil
+    
+    init(
+        contentService: ContentService,
+        contentType: ContentType,
+        content: [Article]? = nil,
+        newsSite: String? = nil
+    ) {
+        _contentService = StateObject(wrappedValue: contentService)
+        self.contentType = contentType
+        self.content = content
+        self.newsSite = newsSite
+    }
+
     
     var body: some View {
         ScrollView {
             LazyVStack (spacing: 1) {
                 ForEach(contentService.articles) { article in
                     NavigationLink(
-                        value: newsSite == nil
-                        ? NavigationTarget.articleView(
-                            article: article,
-                            isLinkToAuthorPresented: true
-                        )
-                        : NavigationTarget.articleView(
-                            article: article,
-                            isLinkToAuthorPresented: false
-                        )
+                        value: configureNavigationLink(for: article)
                     ) {
                         ArticleRow(article: article)
                             .onAppear {
@@ -46,23 +49,22 @@ struct NewsView: View {
             }
             .background(Color.gray)
         }
-        
         .navigationDestination(for: NavigationTarget.self) { target in
-                switch target {
-                case .articleView(let article, let isLinkToAuthorPresented):
-                    ArticleView(
-                        article: article,
-                        contentType: contentType,
-                        contentService: contentService,
-                        isLinkToAuthorPresented: isLinkToAuthorPresented
-                    )
-                    .onAppear {
-                        Task {
-                            await contentService.fetch(category: contentType.rawValue, newsSite: newsSite)
-                        }
+            switch target {
+            case .articleView(let article, let isLinkToAuthorPresented):
+                ArticleView(
+                    article: article,
+                    isLinkToAuthorPresented: isLinkToAuthorPresented,
+                    contentService: contentService,
+                    contentType: contentType
+                )
+                .onAppear {
+                    Task {
+                        await contentService.fetch(category: contentType.rawValue, newsSite: newsSite)
                     }
                 }
-                
+            }
+            
         }
         .onAppear {
             Task {
@@ -78,6 +80,18 @@ struct NewsView: View {
     private func getTitle() -> String {
         guard newsSite != nil else { return "" }
         return "\(contentType) by \(newsSite ?? "")"
+    }
+    
+    private func configureNavigationLink(for article: Article) -> NavigationTarget {
+        newsSite == nil
+        ? NavigationTarget.articleView(
+            article: article,
+            isLinkToAuthorPresented: true
+        )
+        : NavigationTarget.articleView(
+            article: article,
+            isLinkToAuthorPresented: false
+        )
     }
 }
 

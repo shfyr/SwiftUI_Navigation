@@ -9,9 +9,15 @@ import SwiftUI
 
 @main
 struct Homework_2App: App {
+    init() {
+        let contentService = ContentService()
+        
+        ServiceLocator.shared.register(contentService, for: ContentService.self)
+    }
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            let contentService = ServiceLocator.shared.resolve(ContentService.self)
+            ContentView(contentService: contentService)
         }
     }
 }

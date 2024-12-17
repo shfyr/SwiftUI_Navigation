@@ -1,9 +1,7 @@
-
 struct Articles: Codable {
     var results: [Article]
 }
 
-//Hashable
 struct Article: Codable, Hashable, Identifiable {
     var id: Int
     var title: String

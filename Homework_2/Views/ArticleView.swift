@@ -9,12 +9,26 @@ import SwiftUI
 
 struct ArticleView: View {
     var article: Article
-    @State private var didTapButton = false
-    @State var isFavorite: Bool = false
+    var isLinkToAuthorPresented: Bool
+    
+    @StateObject private var contentService: ContentService = ServiceLocator.shared.resolve(ContentService.self)
     @State var contentType: ContentType
     @State var content: [Article]?
-    @StateObject var contentService: ContentService
-    var isLinkToAuthorPresented: Bool
+    
+    init(
+        article: Article,
+        isLinkToAuthorPresented: Bool,
+        contentService: ContentService,
+        contentType: ContentType,
+        content: [Article]? = nil
+    ) {
+        _contentService = StateObject(wrappedValue: contentService)
+        self.article = article
+        self.isLinkToAuthorPresented = isLinkToAuthorPresented
+        self.contentType = contentType
+        self.content = content
+    }
+   
     
     var body: some View {
         VStack {

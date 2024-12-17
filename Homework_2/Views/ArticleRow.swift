@@ -7,23 +7,16 @@
 
 import SwiftUI
 
-struct ButtonAnimation: View {
-    @Binding var isExpanded: Bool
-
-    var body: some View {
-        Image(systemName: "star")
-            .frame(width: 30, height: 30)
-            .foregroundColor(.pink)
-            .opacity(isExpanded ? 0 : 0.5)
-            .scaleEffect(isExpanded ? 4 : 1)
-            .animation(isExpanded ? .easeOut(duration: 0.5) : nil)
-    }
-}
-
 struct ArticleRow: View {
     var article: Article
-    @State private var didTapButton = false
     @State var isFavorite: Bool = false
+    
+    @State private var didTapButton = false
+    
+    init(article: Article, isFavorite: Bool = false) {
+        self.article = article
+        self.isFavorite = isFavorite
+    }
 
     var body: some View {
         VStack {
@@ -80,6 +73,15 @@ struct ArticleRow: View {
     }
 }
 
-#Preview {
-    ArticleRow(article: Article.example)
+struct ButtonAnimation: View {
+    @Binding var isExpanded: Bool
+
+    var body: some View {
+        Image(systemName: "star")
+            .frame(width: 30, height: 30)
+            .foregroundColor(.pink)
+            .opacity(isExpanded ? 0 : 0.5)
+            .scaleEffect(isExpanded ? 4 : 1)
+            .animation(isExpanded ? .easeOut(duration: 0.5) : nil)
+    }
 }

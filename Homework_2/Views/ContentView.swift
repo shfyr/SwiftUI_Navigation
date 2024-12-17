@@ -9,7 +9,11 @@ import SwiftUI
 
 struct ContentView: View {
     @State var tabSelection: ContentType = .articles
-    @StateObject var contentService = ContentService()
+    @StateObject private var contentService: ContentService 
+    
+    init(contentService: ContentService) {
+        _contentService = StateObject(wrappedValue: contentService)
+    }
 
     var body: some View {
         TabView(selection: $tabSelection) {
