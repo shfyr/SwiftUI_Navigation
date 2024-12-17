@@ -6,16 +6,22 @@
 //
 
 import SwiftUI
+import Combine
+import UIComponents
+
+class EventBus {
+    static let shared = EventBus()
+    let favoriteToggled = PassthroughSubject<Article, Never>()
+}
 
 struct ArticleRow: View {
     var article: Article
-    @State var isFavorite: Bool = false
+    @State private var isFavorite: Bool = false
     
-    @State private var didTapButton = false
+    @State var didTapButton = false
     
-    init(article: Article, isFavorite: Bool = false) {
+    init(article: Article) {
         self.article = article
-        self.isFavorite = isFavorite
     }
 
     var body: some View {
@@ -40,12 +46,13 @@ struct ArticleRow: View {
                         .fontWeight(.bold)
                         .font(.system(size: 22))
                         .foregroundStyle(.black)
-
                     Spacer()
 
                     ZStack {
                         Button(action: {
                             isFavorite.toggle()
+                            EventBus.shared.favoriteToggled.send(article)
+
                             self.didTapButton = true
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                 self.didTapButton = false
@@ -72,18 +79,5 @@ struct ArticleRow: View {
 
         .padding(.horizontal, 20)
         .background(Color.white)
-    }
-}
-
-struct ButtonAnimation: View {
-    @Binding var isExpanded: Bool
-
-    var body: some View {
-        Image(systemName: "star")
-            .frame(width: 30, height: 30)
-            .foregroundColor(.pink)
-            .opacity(isExpanded ? 0 : 0.5)
-            .scaleEffect(isExpanded ? 4 : 1)
-            .animation(isExpanded ? .easeOut(duration: 0.5) : nil)
     }
 }

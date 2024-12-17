@@ -1,7 +1,11 @@
 import SwiftUI
 import Combine
 
-struct NetworkService {
+protocol NetworkServiceProtocol {
+    func fetchArticles(category: String, newsSite: String?, offset: Int) async throws -> Articles
+}
+
+struct NetworkService: NetworkServiceProtocol {
     private let baseURL = "https://api.spaceflightnewsapi.net/v4/"
     
     func fetchArticles(category: String, newsSite: String?, offset: Int) async throws -> Articles {

@@ -6,7 +6,7 @@
 //
 import SwiftUI
 
-private enum NavigationTarget: Hashable {
+enum NavigationTarget: Hashable {
     case articleView(article: Article, isLinkToAuthorPresented: Bool)
 }
 
@@ -31,7 +31,9 @@ struct NewsView: View {
                             isLinkToAuthorPresented: newsSite == nil
                         )
                     ) {
-                        ArticleRow(article: article)
+                        ArticleRow(
+                            article: article
+                        )
                             .onAppear {
                                 Task {
                                     if viewModel.articles.isLastItem(article) {

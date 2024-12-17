@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var tabSelection: ContentType = .articles
-
+    
     var body: some View {
         TabView(selection: $tabSelection) {
             ForEach(ContentType.allCases, id: \.self) { tab in
@@ -18,10 +18,16 @@ struct ContentView: View {
                     NewsView(viewModel: ArticlesViewModel(), contentType: tab)
                 }
                 .tabItem {
-                    Label(tab.rawValue, systemImage: "heart")
+                    Label(tab.rawValue, systemImage: "newspaper")
                 }
                 .tag(tab)
             }
+            FavoritesView()
+                .tabItem {
+                    Label("Favorites", systemImage: "star.fill")
+                }
+                .tag("favorites")
         }
     }
 }
+
